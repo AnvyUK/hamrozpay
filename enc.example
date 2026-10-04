@@ -1,0 +1,23 @@
+# === HamrozPay Configuration ===
+
+APP_MODE=demo
+PORT=3000
+APP_URL=https://your-app.onrender.com
+
+# JWT_SECRET: минимум 32 символа
+# ENCRYPTION_KEY: ровно 64 hex-символа
+JWT_SECRET=change_me_to_a_long_random_string_at_least_32_chars_long
+ENCRYPTION_KEY=change_me_64_hex_characters_0000000000000000000000000000000000
+
+# База данных (из Neon)
+DATABASE_URL=postgres://user:password@host/dbname?sslmode=require
+
+# Telegram Bot
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_ADMIN_CHAT_ID=
+
+# Демо-курсы
+DEMO_RATE_RUB_UZS=135
+DEMO_RATE_USD_UZS=12650
+DEMO_RATE_RUB_TJS=0.115
+DEMO_RATE_USD_TJS=10.85
