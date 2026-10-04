@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>HamrozPay</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  * { -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; }
+  .grad-bg { background: radial-gradient(circle at 20% 0%, #1e3a8a 0%, #0f172a 45%, #020617 100%); min-height: 100vh; }
+  .glass { background: rgba(255,255,255,0.06); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 40px rgba(0,0,0,0.35); }
+  .gold-text { color: #fbbf24; }
+  .btn-gold { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #0f172a; font-weight: 700; transition: all 0.25s ease; }
+  .btn-gold:active { transform: scale(0.98); }
+  .btn-ghost { border: 1px solid rgba(255,255,255,0.15); color: #e2e8f0; transition: all 0.25s ease; background: transparent; }
+  .btn-ghost:active { background: rgba(255,255,255,0.1); }
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  input, select { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.12) !important; color: #f1f5f9 !important; font-size: 16px; }
+  input:focus, select:focus { outline: none; border-color: #fbbf24 !important; }
+  option { background: #0f172a; color: #f1f5f9; }
+  .timeline-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+</style>
+</head>
+<body class="grad-bg text-slate-100">
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, createContext, useContext } = React;
+
+// ==================== i18n ====================
+const LOCALES = {
+  uz: { app_name:"HamrozPay", tagline:"Hamroz — har doim yoningizda", login:"Kirish", register:"Ro'yxatdan o'tish", email:"Email", password:"Parol", full_name:"To'liq ism", logout:"Chiqish", send_money:"Pul yuborish", from_country:"Qayerdan", to_country:"Qayerga", amount:"Miqdor", recipient:"Qabul qiluvchi", add_recipient:"Qabul qiluvchini qo'shish", speed:"Tezlik", instant:"⚡ Tez (1-5 daqiqa)", fast:"🚀 O'rtacha (1-2 soat)", economy:"💰 Tejamkor (24 soat)", fee:"Komissiya", rate:"Kurs", will_receive:"Qabul qiluvchi oladi", confirm:"Tasdiqlash", cancel:"Bekor qilish", history:"Tarix", track:"Kuzatish", back:"Orqaga", status_processing:"Jarayonda", status_completed:"Bajarildi", status_on_hold:"Tekshiruvda", status_rejected:"Rad etildi", demo_mode:"Demo rejimi", error_login:"Email yoki parol xato", error_required:"Barcha maydonlarni to'ldiring", success:"Muvaffaqiyatli", need_account:"Hisobingiz yo'qmi?", have_account:"Hisobingiz bormi?", risk_warning:"Firibgarlar tez-tez pul so'rashadi. Ishonch hosil qiling, bu sizning qarindoshingiz.", card:"Karta", account:"Bank hisobi", cash:"Naqd pul", country_uz:"O'zbekiston", country_tj:"Tojikiston" },
+  tg: { app_name:"HamrozPay", tagline:"Ҳамроз — ҳамеша дар паҳлӯи шумо", login:"Даромадан", register:"Бақайдгирӣ", email:"Email", password:"Рамз", full_name:"Номи пурра", logout:"Баромадан", send_money:"Ирсоли пул", from_country:"Аз куҷо", to_country:"Ба куҷо", amount:"Маблағ", recipient:"Гиранда", add_recipient:"Илова кардани гиранда", speed:"Суръат", instant:"⚡ Зуд (1-5 дақиқа)", fast:"🚀 Миёна (1-2 соат)", economy:"💰 Иқтисодӣ (24 соат)", fee:"Комиссия", rate:"Қурс", will_receive:"Гиранда мегирад", confirm:"Тасдиқ", cancel:"Бекор кардан", history:"Таърих", track:"Пайгирӣ", back:"Бозгашт", status_processing:"Дар раванд", status_completed:"Иҷро шуд", status_on_hold:"Дар санҷиш", status_rejected:"Рад шуд", demo_mode:"Ҳолати демо", error_login:"Email ё рамз нодуруст", error_required:"Ҳамаи майдонҳоро пур кунед", success:"Бомуваффақият", need_account:"Ҳисоб надоред?", have_account:"Ҳисоб доред?", risk_warning:"Қаллобиҳо аксар вақт пул талаб мекунанд. Боварӣ ҳосил кунед.", card:"Корт", account:"Ҳисоби бонкӣ", cash:"Пули нақд", country_uz:"Ӯзбекистон", country_tj:"Тоҷикистон" },
+  en: { app_name:"HamrozPay", tagline:"Hamroz — always by your side", login:"Login", register:"Register", email:"Email", password:"Password", full_name:"Full name", logout:"Logout", send_money:"Send money", from_country:"From", to_country:"To", amount:"Amount", recipient:"Recipient", add_recipient:"Add recipient", speed:"Speed", instant:"⚡ Instant (1-5 min)", fast:"🚀 Fast (1-2 hours)", economy:"💰 Economy (24 hours)", fee:"Fee", rate:"Rate", will_receive:"Recipient gets", confirm:"Confirm", cancel:"Cancel", history:"History", track:"Track", back:"Back", status_processing:"Processing", status_completed:"Completed", status_on_hold:"On hold", status_rejected:"Rejected", demo_mode:"Demo mode", error_login:"Invalid email or password", error_required:"Fill in all fields", success:"Success", need_account:"Don't have an account?", have_account:"Have an account?", risk_warning:"Scammers often ask for urgent money. Make sure this is really your relative.", card:"Card", account:"Bank account", cash:"Cash", country_uz:"Uzbekistan", country_tj:"Tajikistan" },
+  ru: { app_name:"HamrozPay", tagline:"Хамроз — всегда рядом", login:"Вход", register:"Регистрация", email:"Email", password:"Пароль", full_name:"Полное имя", logout:"Выйти", send_money:"Отправить деньги", from_country:"Откуда", to_country:"Куда", amount:"Сумма", recipient:"Получатель", add_recipient:"Добавить получателя", speed:"Скорость", instant:"⚡ Мгновенно (1-5 мин)", fast:"🚀 Быстро (1-2 ч)", economy:"💰 Экономно (24 ч)", fee:"Комиссия", rate:"Курс", will_receive:"Получатель получит", confirm:"Подтвердить", cancel:"Отмена", history:"История", track:"Отследить", back:"Назад", status_processing:"В обработке", status_completed:"Завершён", status_on_hold:"На проверке", status_rejected:"Отклонён", demo_mode:"Демо-режим", error_login:"Неверный email или пароль", error_required:"Заполните все поля", success:"Успешно", need_account:"Нет аккаунта?", have_account:"Есть аккаунт?", risk_warning:"Мошенники часто просят срочно перевести деньги. Убедитесь, что это ваш родственник.", card:"Карта", account:"Банковский счёт", cash:"Наличные", country_uz:"Узбекистан", country_tj:"Таджикистан" }
+};
+
+const LangContext = createContext({ lang: 'uz', t: k => k, setLang: () => {} });
+
+function LangProvider({ children }) {
+  const [lang, setLangState] = useState(localStorage.getItem('lang') || 'uz');
+  const setLang = (l) => { setLangState(l); localStorage.setItem('lang', l); document.documentElement.lang = l; };
+  const t = (key) => (LOCALES[lang] && LOCALES[lang][key]) || LOCALES.en[key] || key;
+  return <LangContext.Provider value={{ lang, t, setLang }}>{children}</LangContext.Provider>;
+}
+const useLang = () => useContext(LangContext);
+
+// ==================== API ====================
+const API = {
+  base: '/api',
+  token: () => localStorage.getItem('token'),
+  async req(path, method = 'GET', body) {
+    const headers = { 'Content-Type': 'application/json' };
+    const tok = this.token();
+    if (tok) headers.Authorization = `Bearer ${tok}`;
+    const res = await fetch(this.base + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'request_failed');
+    return data;
+  },
+  register: (d) => API.req('/auth/register', 'POST', d),
+  login: (d) => API.req('/auth/login', 'POST', d),
+  me: () => API.req('/auth/me'),
+  config: () => API.req('/config'),
+  quote: (d) => API.req('/transfers/quote', 'POST', d),
+  createTransfer: (d) => API.req('/transfers', 'POST', d),
+  transfers: () => API.req('/transfers'),
+  transfer: (id) => API.req('/transfers/' + id),
+  recipients: () => API.req('/recipients'),
+  addRecipient: (d) => API.req('/recipients', 'POST', d)
+};
+
+// ==================== UI ====================
+function LangSwitcher() {
+  const { lang, setLang } = useLang();
+  const langs = [{ code:'uz', label:"UZ" }, { code:'tg', label:'TJ' }, { code:'en', label:'EN' }, { code:'ru', label:'RU' }];
+  return (
+    <div className="flex gap-1 bg-white/5 rounded-full p-1 border border-white/10">
+      {langs.map(l => (
+        <button key={l.code} onClick={() => setLang(l.code)}
+          className={`px-2.5 py-1 text-xs rounded-full transition ${lang === l.code ? 'bg-amber-400 text-slate-900 font-bold' : 'text-slate-300'}`}>{l.label}</button>
+      ))}
+    </div>
+  );
+}
+
+function Header({ user, onLogout }) {
+  const { t } = useLang();
+  return (
+    <header className="flex items-center justify-between px-4 py-3 glass border-b border-white/10 sticky top-0 z-10">
+      <div className="flex items-center gap-2">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center font-black text-slate-900">H</div>
+        <div className="font-bold gold-text">{t('app_name')}</div>
+      </div>
+      <div className="flex items-center gap-2">
+        <LangSwitcher />
+        {user && <button onClick={onLogout} className="btn-ghost px-2 py-1 rounded-lg text-xs">{t('logout')}</button>}
+      </div>
+    </header>
+  );
+}
+
+function AuthScreen({ onAuth }) {
+  const { t } = useLang();
+  const [mode, setMode] = useState('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [err, setErr] = useState('');
+
+  const submit = async (e) => {
+    e.preventDefault(); setErr('');
+    if (!email || !password || (mode === 'register' && !fullName)) { setErr(t('error_required')); return; }
+    try {
+      const data = mode === 'login' ? await API.login({ email, password }) : await API.register({ email, password, fullName, language: localStorage.getItem('lang') || 'uz' });
+      localStorage.setItem('token', data.token);
+      onAuth(data.user);
+    } catch (e) { setErr(mode === 'login' ? t('error_login') : e.message); }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 fade-in">
+      <div className="glass rounded-3xl p-6 w-full max-w-md">
+        <div className="text-center mb-6">
+          <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center font-black text-slate-900 text-xl mb-3">H</div>
+          <h1 className="text-xl font-bold gold-text">{t('app_name')}</h1>
+          <p className="text-xs text-slate-400 mt-1">{t('tagline')}</p>
+        </div>
+        <form onSubmit={submit} className="space-y-3">
+          {mode === 'register' && <input type="text" placeholder={t('full_name')} value={fullName} onChange={e => setFullName(e.target.value)} className="w-full px-4 py-3 rounded-xl" />}
+          <input type="email" placeholder={t('email')} value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 rounded-xl" />
+          <input type="password" placeholder={t('password')} value={password} onChange={e => setPassword(e.target.value)} className="w-full px-4 py-3 rounded-xl" />
+          {err && <div className="text-red-400 text-sm">{err}</div>}
+          <button type="submit" className="btn-gold w-full py-3 rounded-xl">{mode === 'login' ? t('login') : t('register')}</button>
+        </form>
+        <div className="mt-4 text-center text-xs text-slate-400">
+          {mode === 'login' ? t('need_account') : t('have_account')}{' '}
+          <button onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setErr(''); }} className="gold-text font-bold">{mode === 'login' ? t('register') : t('login')}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TransferForm({ onCreated }) {
+  const { t } = useLang();
+  const [from, setFrom] = useState('RUB');
+  const [to, setTo] = useState('UZS');
+  const [amount, setAmount] = useState('');
+  const [speed, setSpeed] = useState('fast');
+  const [quote, setQuote] = useState(null);
+  const [recipients, setRecipients] = useState([]);
+  const [recipientId, setRecipientId] = useState('');
+  const [newRec, setNewRec] = useState({ fullName: '', country: 'UZ', method: 'card', details: '' });
+  const [showAdd, setShowAdd] = useState(false);
+  const [err, setErr] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => { API.recipients().then(setRecipients).catch(() => {}); }, []);
+
+  useEffect(() => {
+    const a = parseFloat(amount);
+    if (!a || a <= 0) { setQuote(null); return; }
+    const timer = setTimeout(() => {
+      API.quote({ fromCurrency: from, toCurrency: to, amount: a, speed }).then(setQuote).catch(() => setQuote(null));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [from, to, amount, speed]);
+
+  const addRecipient = async () => {
+    if (!newRec.fullName || !newRec.details) { setErr(t('error_required')); return; }
+    try {
+      const r = await API.addRecipient(newRec);
+      setRecipients(prev => [...prev, r]); setRecipientId(r.id); setShowAdd(false);
+      setNewRec({ fullName: '', country: 'UZ', method: 'card', details: '' }); setErr('');
+    } catch (e) { setErr(e.message); }
+  };
+
+  const submit = async () => {
+    setErr('');
+    if (!recipientId || !amount) { setErr(t('error_required')); return; }
+    setLoading(true);
+    try {
+      const res = await API.createTransfer({ recipientId, fromCountry: from === 'RUB' ? 'RU' : 'US', toCountry: to === 'UZS' ? 'UZ' : 'TJ', fromCurrency: from, toCurrency: to, amount: parseFloat(amount), speed });
+      onCreated(res);
+    } catch (e) { setErr(e.message); } finally { setLoading(false); }
+  };
+
+  const speeds = [{ key: 'instant', label: t('instant'), fee: 4.99 }, { key: 'fast', label: t('fast'), fee: 2.99 }, { key: 'economy', label: t('economy'), fee: 1.99 }];
+
+  return (
+    <div className="space-y-4 fade-in">
+      <div className="glass rounded-2xl p-4">
+        <h2 className="text-lg font-bold mb-3 gold-text">{t('send_money')}</h2>
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div><label className="text-xs text-slate-400 mb-1 block">{t('from_country')}</label>
+            <select value={from} onChange={e => setFrom(e.target.value)} className="w-full px-3 py-2.5 rounded-xl text-sm"><option value="RUB">🇷🇺 RUB</option><option value="USD">🇺🇸 USD</option></select></div>
+          <div><label className="text-xs text-slate-400 mb-1 block">{t('to_country')}</label>
+            <select value={to} onChange={e => setTo(e.target.value)} className="w-full px-3 py-2.5 rounded-xl text-sm"><option value="UZS">🇺🇿 UZS</option><option value="TJS">🇹🇯 TJS</option></select></div>
+        </div>
+        <div className="mb-3"><label className="text-xs text-slate-400 mb-1 block">{t('amount')}</label>
+          <input type="number" inputMode="decimal" value={amount} onChange={e => setAmount(e.target.value)} placeholder="10000" className="w-full px-3 py-3 rounded-xl text-lg" /></div>
+        <div className="mb-3"><label className="text-xs text-slate-400 mb-2 block">{t('speed')}</label>
+          <div className="space-y-2">{speeds.map(s => (
+            <button key={s.key} onClick={() => setSpeed(s.key)} className={`w-full text-left px-3 py-2.5 rounded-xl border transition ${speed === s.key ? 'border-amber-400 bg-amber-400/10' : 'border-white/10'}`}>
+              <div className="flex justify-between items-center"><span className="text-sm">{s.label}</span><span className="gold-text font-bold text-sm">${s.fee}</span></div>
+            </button>
+          ))}</div></div>
+        <div className="mb-3"><div className="flex items-center justify-between mb-1">
+          <label className="text-xs text-slate-400">{t('recipient')}</label>
+          <button onClick={() => setShowAdd(!showAdd)} className="text-xs gold-text">+ {t('add_recipient')}</button></div>
+          {recipients.length > 0 ? (
+            <select value={recipientId} onChange={e => setRecipientId(e.target.value)} className="w-full px-3 py-2.5 rounded-xl text-sm">
+              <option value="">—</option>{recipients.map(r => <option key={r.id} value={r.id}>{r.fullName} · {r.masked}</option>)}
+            </select>
+          ) : <div className="text-xs text-slate-500 italic px-2">—</div>}</div>
+        {showAdd && (
+          <div className="mb-3 p-3 rounded-xl bg-white/5 border border-white/10 space-y-2 fade-in">
+            <input type="text" placeholder={t('full_name')} value={newRec.fullName} onChange={e => setNewRec({ ...newRec, fullName: e.target.value })} className="w-full px-3 py-2 rounded-lg text-sm" />
+            <select value={newRec.country} onChange={e => setNewRec({ ...newRec, country: e.target.value })} className="w-full px-3 py-2 rounded-lg text-sm"><option value="UZ">🇺🇿 {t('country_uz')}</option><option value="TJ">🇹🇯 {t('country_tj')}</option></select>
+            <select value={newRec.method} onChange={e => setNewRec({ ...newRec, method: e.target.value })} className="w-full px-3 py-2 rounded-lg text-sm"><option value="card">{t('card')}</option><option value="account">{t('account')}</option><option value="cash">{t('cash')}</option></select>
+            <input type="text" placeholder="8600 0000 0000 0000" value={newRec.details} onChange={e => setNewRec({ ...newRec, details: e.target.value })} className="w-full px-3 py-2 rounded-lg text-sm" />
+            <button onClick={addRecipient} className="btn-gold w-full py-2 rounded-lg text-sm">{t('confirm')}</button>
+          </div>
+        )}
+        {quote && (
+          <div className="mt-3 p-3 rounded-xl bg-gradient-to-br from-amber-400/10 to-amber-600/5 border border-amber-400/20">
+            <div className="flex justify-between text-xs mb-1"><span className="text-slate-400">{t('fee')}</span><span>{quote.fee} {from}</span></div>
+            <div className="flex justify-between text-xs mb-1"><span className="text-slate-400">{t('rate')}</span><span>1 {from} = {quote.rate} {to}</span></div>
+            <div className="flex justify-between font-bold pt-2 border-t border-white/10 mt-2"><span className="gold-text text-sm">{t('will_receive')}</span><span className="gold-text">{quote.received.toLocaleString()} {to}</span></div>
+          </div>
+        )}
+        {err && <div className="text-red-400 text-sm mt-2">{err}</div>}
+        <div className="mt-3 p-2.5 rounded-xl bg-blue-500/10 border border-blue-400/20 text-xs text-blue-200">🛡️ {t('risk_warning')}</div>
+        <button onClick={submit} disabled={loading} className="btn-gold w-full py-3 rounded-xl mt-3 disabled:opacity-50">{loading ? '...' : t('confirm')}</button>
+      </div>
+    </div>
+  );
+}
+
+function History({ onTrack }) {
+  const { t } = useLang();
+  const [list, setList] = useState([]);
+  useEffect(() => { API.transfers().then(setList).catch(() => {}); }, []);
+  const statusColor = { processing: 'text-yellow-400', completed: 'text-green-400', on_hold: 'text-orange-400', rejected: 'text-red-400' };
+  const statusLabel = { processing: t('status_processing'), completed: t('status_completed'), on_hold: t('status_on_hold'), rejected: t('status_rejected') };
+
+  return (
+    <div className="glass rounded-2xl p-4 fade-in">
+      <h2 className="text-lg font-bold mb-3 gold-text">{t('history')}</h2>
+      {list.length === 0 ? <div className="text-center text-slate-500 py-6 text-sm">—</div> : (
+        <div className="space-y-2">{list.map(tr => (
+          <div key={tr.id} className="p-3 rounded-xl bg-white/5 border border-white/10">
+            <div className="flex justify-between items-start mb-1">
+              <div className="text-sm font-medium">{tr.recipient_name || '—'}</div>
+              <div className={`text-xs font-bold ${statusColor[tr.status] || 'text-slate-400'}`}>{statusLabel[tr.status] || tr.status}</div>
+            </div>
+            <div className="text-xs text-slate-400 mb-2">{tr.amount_sent} {tr.from_currency} → {parseFloat(tr.amount_received).toLocaleString()} {tr.to_currency}</div>
+            <button onClick={() => onTrack(tr.id)} className="btn-ghost px-3 py-1 rounded-lg text-xs">{t('track')}</button>
+          </div>
+        ))}</div>
+      )}
+    </div>
+  );
+}
+
+function Timeline({ transferId, onBack }) {
+  const { t } = useLang();
+  const [tr, setTr] = useState(null);
+  useEffect(() => { API.transfer(transferId).then(setTr).catch(() => {}); }, [transferId]);
+
+  if (!tr) return <div className="glass rounded-2xl p-6 text-center text-slate-400 text-sm">...</div>;
+
+  const createdTime = new Date(tr.created_at).toLocaleTimeString();
+  const updatedTime = new Date(tr.updated_at || tr.created_at).toLocaleTimeString();
+  const steps = [
+    { label: 'Создан', time: createdTime, done: true },
+    { label: 'Списано', time: createdTime, done: true },
+    { label: 'В обработке', time: updatedTime, done: tr.status !== 'on_hold' && tr.status !== 'rejected' },
+    { label: 'Отправлено в банк', time: tr.status === 'completed' ? updatedTime : '—', done: tr.status === 'completed' },
+    { label: 'Зачислено', time: tr.status === 'completed' ? updatedTime : '—', done: tr.status === 'completed' }
+  ];
+
+  return (
+    <div className="glass rounded-2xl p-4 fade-in">
+      <button onClick={onBack} className="btn-ghost px-3 py-1.5 rounded-lg text-xs mb-4">← {t('back')}</button>
+      <h2 className="text-lg font-bold mb-4 gold-text">{t('track')}</h2>
+      <div className="space-y-3">{steps.map((s, i) => (
+        <div key={i} className="flex items-start gap-3">
+          <div className={`timeline-dot mt-1 ${s.done ? 'bg-green-400' : 'bg-slate-600'}`}></div>
+          <div className="flex-1">
+            <div className={`text-sm font-medium ${s.done ? 'text-white' : 'text-slate-500'}`}>{s.label}</div>
+            <div className="text-xs text-slate-500">{s.time}</div>
+          </div>
+        </div>
+      ))}</div>
+      <div className="mt-4 pt-3 border-t border-white/10 text-sm">
+        <div className="flex justify-between mb-1"><span className="text-slate-400">{t('amount')}</span><span>{tr.amount_sent} {tr.from_currency}</span></div>
+        <div className="flex justify-between font-bold"><span className="gold-text">{t('will_receive')}</span><span className="gold-text">{parseFloat(tr.amount_received).toLocaleString()} {tr.to_currency}</span></div>
+      </div>
+    </div>
+  );
+}
+
+function MainApp({ user, onLogout }) {
+  const { t } = useLang();
+  const [tab, setTab] = useState('send');
+  const [toast, setToast] = useState(null);
+  const [mode, setMode] = useState('demo');
+  const [trackId, setTrackId] = useState(null);
+
+  useEffect(() => { API.config().then(c => setMode(c.mode)).catch(() => {}); }, []);
+
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 4000); };
+
+  return (
+    <div className="min-h-screen">
+      <Header user={user} onLogout={onLogout} />
+      <div className="max-w-md mx-auto p-4 pb-20">
+        {mode === 'demo' && <div className="mb-3 px-3 py-1.5 rounded-xl bg-amber-400/10 border border-amber-400/30 text-amber-200 text-xs text-center">🧪 {t('demo_mode')}</div>}
+        {!trackId && (
+          <div className="flex gap-2 mb-4">
+            {[{ k: 'send', label: t('send_money') }, { k: 'history', label: t('history') }].map(x => (
+              <button key={x.k} onClick={() => setTab(x.k)} className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium transition ${tab === x.k ? 'btn-gold' : 'btn-ghost'}`}>{x.label}</button>
+            ))}
+          </div>
+        )}
+        {trackId ? <Timeline transferId={trackId} onBack={() => setTrackId(null)} /> : (
+          <>
+            {tab === 'send' && <TransferForm onCreated={(res) => { showToast(`${t('success')}! ${res.amount} ${res.fromCurrency} → ${res.received} ${res.toCurrency}`); setTab('history'); }} />}
+            {tab === 'history' && <History onTrack={setTrackId} />}
+          </>
+        )}
+      </div>
+      {toast && <div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-3 rounded-xl glass font-medium text-green-300 text-sm fade-in max-w-xs text-center">{toast}</div>}
+    </div>
+  );
+}
+
+function Root() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const tg = window.Telegram?.WebApp;
+    if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor && tg.setHeaderColor('#0f172a'); }
+
+    if (API.token()) {
+      API.me().then(setUser).catch(() => localStorage.removeItem('token')).finally(() => setLoading(false));
+    } else setLoading(false);
+  }, []);
+
+  const logout = () => { localStorage.removeItem('token'); setUser(null); };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-slate-400">...</div>;
+  return user ? <MainApp user={user} onLogout={logout} /> : <AuthScreen onAuth={setUser} />;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<LangProvider><Root /></LangProvider>);
+</script>
+</body>
+</html>
