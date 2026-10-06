@@ -33,9 +33,8 @@
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, createContext, useContext } = React;
 
-// ==================== i18n ====================
 const LOCALES = {
-  uz: { app_name:"HamrozPay", tagline:"Hamroz — har doim yoningizda", login:"Kirish", register:"Ro'yxatdan o'tish", email:"Email", password:"Parol", full_name:"To'liq ism", logout:"Chiqish", send_money:"Pul yuborish", from_country:"Qayerdan", to_country:"Qayerga", amount:"Miqdor", recipient:"Qabul qiluvchi", add_recipient:"Qabul qiluvchini qo'shish", speed:"Tezlik", instant:"⚡ Tez (1-5 daqiqa)", fast:"🚀 O'rtacha (1-2 soat)", economy:"💰 Tejamkor (24 soat)", fee:"Komissiya", rate:"Kurs", will_receive:"Qabul qiluvchi oladi", confirm:"Tasdiqlash", cancel:"Bekor qilish", history:"Tarix", track:"Kuzatish", back:"Orqaga", status_processing:"Jarayonda", status_completed:"Bajarildi", status_on_hold:"Tekshiruvda", status_rejected:"Rad etildi", demo_mode:"Demo rejimi", error_login:"Email yoki parol xato", error_required:"Barcha maydonlarni to'ldiring", success:"Muvaffaqiyatli", need_account:"Hisobingiz yo'qmi?", have_account:"Hisobingiz bormi?", risk_warning:"Firibgarlar tez-tez pul so'rashadi. Ishonch hosil qiling, bu sizning qarindoshingiz.", card:"Karta", account:"Bank hisobi", cash:"Naqd pul", country_uz:"O'zbekiston", country_tj:"Tojikiston" },
+  uz: { app_name:"HamrozPay", tagline:"Hamroz — har doim yoningizda", login:"Kirish", register:"Ro'yxatdan o'tish", email:"Email", password:"Parol", full_name:"To'liq ism", logout:"Chiqish", send_money:"Pul yuborish", from_country:"Qayerdan", to_country:"Qayerga", amount:"Miqdor", recipient:"Qabul qiluvchi", add_recipient:"Qabul qiluvchini qo'shish", speed:"Tezlik", instant:"⚡ Tez (1-5 daqiqa)", fast:"🚀 O'rtacha (1-2 soat)", economy:"💰 Tejamkor (24 soat)", fee:"Komissiya", rate:"Kurs", will_receive:"Qabul qiluvchi oladi", confirm:"Tasdiqlash", cancel:"Bekor qilish", history:"Tarix", track:"Kuzatish", back:"Orqaga", status_processing:"Jarayonda", status_completed:"Bajarildi", status_on_hold:"Tekshiruvda", status_rejected:"Rad etildi", demo_mode:"Demo rejimi", error_login:"Email yoki parol xato", error_required:"Barcha maydonlarni to'ldiring", success:"Muvaffaqiyatli", need_account:"Hisobingiz yo'qmi?", have_account:"Hisobingiz bormi?", risk_warning:"Firibgarlar tez-tez pul so'rashadi. Ishonch hosil qiling.", card:"Karta", account:"Bank hisobi", cash:"Naqd pul", country_uz:"O'zbekiston", country_tj:"Tojikiston" },
   tg: { app_name:"HamrozPay", tagline:"Ҳамроз — ҳамеша дар паҳлӯи шумо", login:"Даромадан", register:"Бақайдгирӣ", email:"Email", password:"Рамз", full_name:"Номи пурра", logout:"Баромадан", send_money:"Ирсоли пул", from_country:"Аз куҷо", to_country:"Ба куҷо", amount:"Маблағ", recipient:"Гиранда", add_recipient:"Илова кардани гиранда", speed:"Суръат", instant:"⚡ Зуд (1-5 дақиқа)", fast:"🚀 Миёна (1-2 соат)", economy:"💰 Иқтисодӣ (24 соат)", fee:"Комиссия", rate:"Қурс", will_receive:"Гиранда мегирад", confirm:"Тасдиқ", cancel:"Бекор кардан", history:"Таърих", track:"Пайгирӣ", back:"Бозгашт", status_processing:"Дар раванд", status_completed:"Иҷро шуд", status_on_hold:"Дар санҷиш", status_rejected:"Рад шуд", demo_mode:"Ҳолати демо", error_login:"Email ё рамз нодуруст", error_required:"Ҳамаи майдонҳоро пур кунед", success:"Бомуваффақият", need_account:"Ҳисоб надоред?", have_account:"Ҳисоб доред?", risk_warning:"Қаллобиҳо аксар вақт пул талаб мекунанд. Боварӣ ҳосил кунед.", card:"Корт", account:"Ҳисоби бонкӣ", cash:"Пули нақд", country_uz:"Ӯзбекистон", country_tj:"Тоҷикистон" },
   en: { app_name:"HamrozPay", tagline:"Hamroz — always by your side", login:"Login", register:"Register", email:"Email", password:"Password", full_name:"Full name", logout:"Logout", send_money:"Send money", from_country:"From", to_country:"To", amount:"Amount", recipient:"Recipient", add_recipient:"Add recipient", speed:"Speed", instant:"⚡ Instant (1-5 min)", fast:"🚀 Fast (1-2 hours)", economy:"💰 Economy (24 hours)", fee:"Fee", rate:"Rate", will_receive:"Recipient gets", confirm:"Confirm", cancel:"Cancel", history:"History", track:"Track", back:"Back", status_processing:"Processing", status_completed:"Completed", status_on_hold:"On hold", status_rejected:"Rejected", demo_mode:"Demo mode", error_login:"Invalid email or password", error_required:"Fill in all fields", success:"Success", need_account:"Don't have an account?", have_account:"Have an account?", risk_warning:"Scammers often ask for urgent money. Make sure this is really your relative.", card:"Card", account:"Bank account", cash:"Cash", country_uz:"Uzbekistan", country_tj:"Tajikistan" },
   ru: { app_name:"HamrozPay", tagline:"Хамроз — всегда рядом", login:"Вход", register:"Регистрация", email:"Email", password:"Пароль", full_name:"Полное имя", logout:"Выйти", send_money:"Отправить деньги", from_country:"Откуда", to_country:"Куда", amount:"Сумма", recipient:"Получатель", add_recipient:"Добавить получателя", speed:"Скорость", instant:"⚡ Мгновенно (1-5 мин)", fast:"🚀 Быстро (1-2 ч)", economy:"💰 Экономно (24 ч)", fee:"Комиссия", rate:"Курс", will_receive:"Получатель получит", confirm:"Подтвердить", cancel:"Отмена", history:"История", track:"Отследить", back:"Назад", status_processing:"В обработке", status_completed:"Завершён", status_on_hold:"На проверке", status_rejected:"Отклонён", demo_mode:"Демо-режим", error_login:"Неверный email или пароль", error_required:"Заполните все поля", success:"Успешно", need_account:"Нет аккаунта?", have_account:"Есть аккаунт?", risk_warning:"Мошенники часто просят срочно перевести деньги. Убедитесь, что это ваш родственник.", card:"Карта", account:"Банковский счёт", cash:"Наличные", country_uz:"Узбекистан", country_tj:"Таджикистан" }
@@ -51,7 +50,6 @@ function LangProvider({ children }) {
 }
 const useLang = () => useContext(LangContext);
 
-// ==================== API ====================
 const API = {
   base: '/api',
   token: () => localStorage.getItem('token'),
@@ -76,7 +74,6 @@ const API = {
   addRecipient: (d) => API.req('/recipients', 'POST', d)
 };
 
-// ==================== UI ====================
 function LangSwitcher() {
   const { lang, setLang } = useLang();
   const langs = [{ code:'uz', label:"UZ" }, { code:'tg', label:'TJ' }, { code:'en', label:'EN' }, { code:'ru', label:'RU' }];
@@ -349,7 +346,7 @@ function Root() {
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
-    if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor && tg.setHeaderColor('#0f172a'); }
+    if (tg) { tg.ready(); tg.expand(); if (tg.setHeaderColor) tg.setHeaderColor('#0f172a'); }
 
     if (API.token()) {
       API.me().then(setUser).catch(() => localStorage.removeItem('token')).finally(() => setLoading(false));
