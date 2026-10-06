@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="uz">
 <head>
 <meta charset="UTF-8" />
@@ -73,7 +73,7 @@ const API = {
   recipients: () => API.req('/recipients'),
   addRecipient: (d) => API.req('/recipients', 'POST', d)
 };
- 
+
 function LangSwitcher() {
   const { lang, setLang } = useLang();
   const langs = [{ code:'uz', label:"UZ" }, { code:'tg', label:'TJ' }, { code:'en', label:'EN' }, { code:'ru', label:'RU' }];
@@ -239,7 +239,8 @@ function TransferForm({ onCreated }) {
       </div>
     </div>
   );
-  }
+}
+
 function History({ onTrack }) {
   const { t } = useLang();
   const [list, setList] = useState([]);
