@@ -1,3 +1,38 @@
+Отлично! Держи Часть 1 из 3. Работаем спокойно, по шагам.
+
+---
+
+Шаг 1: Открой файл на GitHub
+
+Открой эту ссылку в браузере телефона:
+
+```
+https://github.com/AnvyUK/hamrozpay/blob/main/public/index.html
+```
+
+Дождись, пока страница загрузится.
+
+---
+
+Шаг 2: Нажми карандаш ✏️
+
+Справа вверху — значок карандаша. Нажми его.
+
+Откроется редактор — большое поле с кодом.
+
+---
+
+Шаг 3: Замени содержимое
+
+1. Выдели всё содержимое: долгое нажатие на текст → «Выделить всё»
+2. Удали
+3. Вставь Часть 1 ниже
+
+---
+
+Шаг 4: Вставь этот код (Часть 1 из 3)
+
+```html
 <!DOCTYPE html>
 <html lang="uz">
 <head>
@@ -73,6 +108,11 @@ const API = {
   recipients: () => API.req('/recipients'),
   addRecipient: (d) => API.req('/recipients', 'POST', d)
 };
+```
+
+---
+
+```javascript
 
 function LangSwitcher() {
   const { lang, setLang } = useLang();
@@ -240,126 +280,7 @@ function TransferForm({ onCreated }) {
     </div>
   );
 }
+```
 
-function History({ onTrack }) {
-  const { t } = useLang();
-  const [list, setList] = useState([]);
-  useEffect(() => { API.transfers().then(setList).catch(() => {}); }, []);
-  const statusColor = { processing: 'text-yellow-400', completed: 'text-green-400', on_hold: 'text-orange-400', rejected: 'text-red-400' };
-  const statusLabel = { processing: t('status_processing'), completed: t('status_completed'), on_hold: t('status_on_hold'), rejected: t('status_rejected') };
+---
 
-  return (
-    <div className="glass rounded-2xl p-4 fade-in">
-      <h2 className="text-lg font-bold mb-3 gold-text">{t('history')}</h2>
-      {list.length === 0 ? <div className="text-center text-slate-500 py-6 text-sm">—</div> : (
-        <div className="space-y-2">{list.map(tr => (
-          <div key={tr.id} className="p-3 rounded-xl bg-white/5 border border-white/10">
-            <div className="flex justify-between items-start mb-1">
-              <div className="text-sm font-medium">{tr.recipient_name || '—'}</div>
-              <div className={`text-xs font-bold ${statusColor[tr.status] || 'text-slate-400'}`}>{statusLabel[tr.status] || tr.status}</div>
-            </div>
-            <div className="text-xs text-slate-400 mb-2">{tr.amount_sent} {tr.from_currency} → {parseFloat(tr.amount_received).toLocaleString()} {tr.to_currency}</div>
-            <button onClick={() => onTrack(tr.id)} className="btn-ghost px-3 py-1 rounded-lg text-xs">{t('track')}</button>
-          </div>
-        ))}</div>
-      )}
-    </div>
-  );
-}
-
-function Timeline({ transferId, onBack }) {
-  const { t } = useLang();
-  const [tr, setTr] = useState(null);
-  useEffect(() => { API.transfer(transferId).then(setTr).catch(() => {}); }, [transferId]);
-
-  if (!tr) return <div className="glass rounded-2xl p-6 text-center text-slate-400 text-sm">...</div>;
-
-  const createdTime = new Date(tr.created_at).toLocaleTimeString();
-  const updatedTime = new Date(tr.updated_at || tr.created_at).toLocaleTimeString();
-  const steps = [
-    { label: 'Создан', time: createdTime, done: true },
-    { label: 'Списано', time: createdTime, done: true },
-    { label: 'В обработке', time: updatedTime, done: tr.status !== 'on_hold' && tr.status !== 'rejected' },
-    { label: 'Отправлено в банк', time: tr.status === 'completed' ? updatedTime : '—', done: tr.status === 'completed' },
-    { label: 'Зачислено', time: tr.status === 'completed' ? updatedTime : '—', done: tr.status === 'completed' }
-  ];
-
-  return (
-    <div className="glass rounded-2xl p-4 fade-in">
-      <button onClick={onBack} className="btn-ghost px-3 py-1.5 rounded-lg text-xs mb-4">← {t('back')}</button>
-      <h2 className="text-lg font-bold mb-4 gold-text">{t('track')}</h2>
-      <div className="space-y-3">{steps.map((s, i) => (
-        <div key={i} className="flex items-start gap-3">
-          <div className={`timeline-dot mt-1 ${s.done ? 'bg-green-400' : 'bg-slate-600'}`}></div>
-          <div className="flex-1">
-            <div className={`text-sm font-medium ${s.done ? 'text-white' : 'text-slate-500'}`}>{s.label}</div>
-            <div className="text-xs text-slate-500">{s.time}</div>
-          </div>
-        </div>
-      ))}</div>
-      <div className="mt-4 pt-3 border-t border-white/10 text-sm">
-        <div className="flex justify-between mb-1"><span className="text-slate-400">{t('amount')}</span><span>{tr.amount_sent} {tr.from_currency}</span></div>
-        <div className="flex justify-between font-bold"><span className="gold-text">{t('will_receive')}</span><span className="gold-text">{parseFloat(tr.amount_received).toLocaleString()} {tr.to_currency}</span></div>
-      </div>
-    </div>
-  );
-}
-
-function MainApp({ user, onLogout }) {
-  const { t } = useLang();
-  const [tab, setTab] = useState('send');
-  const [toast, setToast] = useState(null);
-  const [mode, setMode] = useState('demo');
-  const [trackId, setTrackId] = useState(null);
-
-  useEffect(() => { API.config().then(c => setMode(c.mode)).catch(() => {}); }, []);
-
-  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 4000); };
-
-  return (
-    <div className="min-h-screen">
-      <Header user={user} onLogout={onLogout} />
-      <div className="max-w-md mx-auto p-4 pb-20">
-        {mode === 'demo' && <div className="mb-3 px-3 py-1.5 rounded-xl bg-amber-400/10 border border-amber-400/30 text-amber-200 text-xs text-center">🧪 {t('demo_mode')}</div>}
-        {!trackId && (
-          <div className="flex gap-2 mb-4">
-            {[{ k: 'send', label: t('send_money') }, { k: 'history', label: t('history') }].map(x => (
-              <button key={x.k} onClick={() => setTab(x.k)} className={`flex-1 px-3 py-2 rounded-xl text-sm font-medium transition ${tab === x.k ? 'btn-gold' : 'btn-ghost'}`}>{x.label}</button>
-            ))}
-          </div>
-        )}
-        {trackId ? <Timeline transferId={trackId} onBack={() => setTrackId(null)} /> : (
-          <>
-            {tab === 'send' && <TransferForm onCreated={(res) => { showToast(`${t('success')}! ${res.amount} ${res.fromCurrency} → ${res.received} ${res.toCurrency}`); setTab('history'); }} />}
-            {tab === 'history' && <History onTrack={setTrackId} />}
-          </>
-        )}
-      </div>
-      {toast && <div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-3 rounded-xl glass font-medium text-green-300 text-sm fade-in max-w-xs text-center">{toast}</div>}
-    </div>
-  );
-}
-
-function Root() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    if (tg) { tg.ready(); tg.expand(); if (tg.setHeaderColor) tg.setHeaderColor('#0f172a'); }
-
-    if (API.token()) {
-      API.me().then(setUser).catch(() => localStorage.removeItem('token')).finally(() => setLoading(false));
-    } else setLoading(false);
-  }, []);
-
-  const logout = () => { localStorage.removeItem('token'); setUser(null); };
-
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-slate-400">...</div>;
-  return user ? <MainApp user={user} onLogout={logout} /> : <AuthScreen onAuth={setUser} />;
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<LangProvider><Root /></LangProvider>);
-</script>
-</body>
-</html>
